@@ -1,72 +1,53 @@
 ---
-description: Implement and modify Angular applications using the
-  repository's actual Angular version, conventions, typed APIs, Signals,
-  RxJS, forms, and component patterns.
 name: angular-engineering
+description: 'Implement, modify, or debug Angular applications. Use for Angular components, services, routing, state, RxJS, Signals, forms, PrimeNG, localization, and tests; follow the repository''s installed versions and patterns.'
 ---
 
 # Angular Engineering
 
-## First inspect
+## Workflow
 
--   package.json and lockfile for Angular, TypeScript, RxJS, PrimeNG,
-    and tooling versions.
--   Existing standalone/module setup, routing, providers, interceptors,
-    and build configuration.
--   Similar components, services, models, tests, and styles.
--   Existing translation and theme systems.
+1. Inspect `package.json` and the lockfile for Angular, TypeScript, RxJS, UI libraries, and test/build tools. Check the Angular workspace configuration and the relevant feature files.
+2. Trace the existing behavior through related components, routes, services, models, tests, and styles. Check providers, interceptors, translation, theme, and direction systems when relevant.
+3. Identify the smallest change boundary. Follow existing project patterns; separate confirmed requirements from unknown behavior and ask only when an unknown materially affects the implementation.
+4. Implement the change using APIs supported by the installed versions. Keep data access, business rules, UI, and state in the layers already used by the project.
+5. Add or update focused tests, then run the narrowest relevant test, lint, type-check, or build commands available. Report exactly what ran and any checks that remain.
 
-## Implementation principles
+## Angular and TypeScript
 
--   Follow the installed Angular version; never assume the starter's
-    Angular version matches the repo.
--   Follow standalone-first only when compatible with the project.
--   Use strict TypeScript and typed models at API/form boundaries.
--   Prefer `inject()` or constructor injection according to established
-    project style.
--   Use Signals for local synchronous state where they improve clarity.
--   Use RxJS for asynchronous streams, cancellation, composition, and
-    event-driven workflows.
--   Avoid manual subscriptions when template async patterns or signal
-    interop are clearer.
--   For component-scoped subscriptions, prefer `takeUntilDestroyed` when
-    supported and consistent with the codebase.
--   Keep API calls in services/data-access layers.
--   Handle loading, empty, success, and error states explicitly.
--   Avoid `any`, unsafe casts, duplicated subscriptions, and nested
-    subscriptions.
+- Follow the installed Angular version and project setup. Do not assume standalone components, a particular template syntax, or newer APIs are available; do not migrate modules or upgrade dependencies unless requested.
+- Use the project's established dependency-injection, component, routing, and provider patterns.
+- Use explicit types at API and form boundaries. Avoid `any`, unsafe casts, and duplicate types; do not treat a TypeScript interface as runtime validation of external data.
+- Keep components focused on rendering and interaction. Put API calls in the established service or data-access layer, and keep business rules out of templates.
+- Use Signals for local synchronous state when they make ownership and updates clearer. Use RxJS for streams, async composition, cancellation, and event-driven workflows. Do not convert Observables or introduce a state library without a concrete reason.
+- Prefer template async patterns or existing signal interop over manual subscriptions. Where a component-scoped subscription is necessary, use the project's cleanup pattern; use `takeUntilDestroyed` only when supported by the installed Angular version.
+- Reuse existing shared utilities and components. Create abstractions only when they clarify a real responsibility or repeated use case.
 
-## Reactive Forms
+## Data and failure states
 
--   Use Reactive Forms for complex forms and when consistent with the
-    application.
--   Keep validators explicit and typed.
--   Support dynamic controls and conditional validation without
-    scattering rules through templates.
--   Show accessible validation messages and preserve entered values when
-    appropriate.
--   Do not assume a field is required unless requirements or existing
-    behavior establish it.
+- Preserve the existing API contract, interceptor behavior, and error-reporting conventions. Do not invent endpoints, response fields, retries, or success behavior.
+- Represent loading, empty, success, and error states when relevant to the flow. Surface failures through the established UI or logging mechanism; do not swallow errors or show success after a failure.
+- Avoid duplicate requests and subscriptions. Use the existing cancellation and concurrency patterns where stale or overlapping requests are possible.
 
-## PrimeNG and styling
+## Forms
 
--   Inspect the installed PrimeNG version and current theme
-    configuration before using component APIs.
--   Reuse shared wrappers and project-level styles.
--   Follow the current Tailwind/SCSS division of responsibility.
--   Do not introduce global CSS overrides without checking impact.
+- Follow the application's form approach. Use typed Reactive Forms when supported and consistent with the project, particularly for complex, dynamic, or cross-field validation.
+- Keep validation rules explicit and close to form logic. Do not make a field required or add business rules without evidence from requirements or existing behavior.
+- Preserve entered values on recoverable errors where appropriate, and associate validation feedback with its controls accessibly.
+
+## UI, PrimeNG, and styling
+
+- Check the installed PrimeNG and styling versions, theme configuration, shared wrappers, design tokens, and nearby components before using APIs or adding styles.
+- Keep Tailwind, SCSS, and global styles within the responsibilities established by the project. Avoid broad overrides that can affect unrelated screens.
+- Use semantic, keyboard-operable controls with visible focus and appropriate labels. Preserve the project's responsive behavior and dark/light theme support where relevant.
 
 ## Localization and direction
 
--   Use the repository's translation service and key conventions.
--   Do not hardcode user-facing text in a localized feature.
--   Check RTL and LTR using logical CSS properties (`margin-inline`,
-    `padding-inline`, `inset-inline`, etc.) where appropriate.
--   Avoid assuming English-only labels or layouts.
+- Use the project's translation service and key conventions. Do not hardcode user-facing strings in a localized feature.
+- Preserve the established RTL/LTR direction strategy. Prefer CSS logical properties for direction-sensitive spacing and positioning, and check layouts in the directions the feature supports.
 
-## Quality
+## Validation
 
--   Add or update tests for behavior and edge cases.
--   Run relevant format/lint/type-check/test/build commands discovered
-    in the repo.
--   Report commands and results accurately.
+- Add or update tests for changed behavior and important edge cases using the repository's existing test framework and conventions.
+- Run the smallest relevant test and static-check commands discovered in the project; run a build when the change affects compilation or configuration.
+- Do not claim checks passed unless they ran successfully. State when a check is unavailable or was not run.
